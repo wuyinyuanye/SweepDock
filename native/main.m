@@ -593,23 +593,23 @@ static NSColor *SweepDockSecondaryTextColor(void) {
 }
 
 static NSColor *SweepDockPanelColor(void) {
-    return [NSColor colorWithCalibratedRed:0.945 green:0.948 blue:0.952 alpha:1.0];
+    return [NSColor colorWithCalibratedRed:0.970 green:0.972 blue:0.975 alpha:1.0];
 }
 
 static NSColor *SweepDockSidebarColor(void) {
-    return [NSColor colorWithCalibratedRed:0.915 green:0.920 blue:0.925 alpha:1.0];
+    return [NSColor colorWithCalibratedRed:0.955 green:0.958 blue:0.962 alpha:1.0];
 }
 
 static NSColor *SweepDockCardColor(void) {
-    return [NSColor colorWithCalibratedRed:0.985 green:0.987 blue:0.990 alpha:1.0];
+    return [NSColor colorWithCalibratedRed:1.0 green:1.0 blue:1.0 alpha:1.0];
 }
 
 static NSColor *SweepDockAccentColor(void) {
-    return [NSColor colorWithCalibratedRed:0.16 green:0.17 blue:0.19 alpha:1.0];
+    return [NSColor controlAccentColor];
 }
 
 static NSColor *SweepDockDangerColor(void) {
-    return [NSColor colorWithCalibratedRed:0.58 green:0.35 blue:0.12 alpha:1.0];
+    return SweepDockTextColor();
 }
 
 static NSString *SweepDockPercent(NSNumber *number) {
@@ -1166,36 +1166,16 @@ static int SweepDockSelfTest(void) {
     view.layer.backgroundColor = SweepDockCardColor().CGColor;
     view.layer.cornerRadius = radius;
     view.layer.borderWidth = 1;
-    view.layer.borderColor = [NSColor colorWithCalibratedWhite:0.84 alpha:0.75].CGColor;
+    view.layer.borderColor = [NSColor colorWithCalibratedWhite:0.86 alpha:0.55].CGColor;
     return view;
 }
 
 - (void)styleButton:(NSButton *)button prominent:(BOOL)prominent danger:(BOOL)danger {
-    button.bezelStyle = NSBezelStyleRegularSquare;
-    button.font = [NSFont systemFontOfSize:13 weight:prominent ? NSFontWeightSemibold : NSFontWeightMedium];
+    button.bezelStyle = NSBezelStyleRounded;
+    button.font = [NSFont systemFontOfSize:13 weight:prominent ? NSFontWeightMedium : NSFontWeightRegular];
     button.alignment = NSTextAlignmentCenter;
     button.lineBreakMode = NSLineBreakByTruncatingTail;
-    button.wantsLayer = YES;
-    button.layer.cornerRadius = prominent ? 7 : 6;
-    button.layer.masksToBounds = YES;
-    if (prominent) {
-        if (danger) {
-            button.layer.backgroundColor = [NSColor colorWithCalibratedRed:0.985 green:0.972 blue:0.948 alpha:1.0].CGColor;
-            button.layer.borderWidth = 1;
-            button.layer.borderColor = [NSColor colorWithCalibratedRed:0.78 green:0.66 blue:0.48 alpha:0.85].CGColor;
-            button.contentTintColor = SweepDockDangerColor();
-        } else {
-            button.layer.backgroundColor = SweepDockAccentColor().CGColor;
-            button.layer.borderWidth = 1;
-            button.layer.borderColor = [NSColor colorWithCalibratedWhite:0.10 alpha:0.95].CGColor;
-            button.contentTintColor = [NSColor whiteColor];
-        }
-    } else {
-        button.layer.backgroundColor = [NSColor colorWithCalibratedWhite:1.0 alpha:0.56].CGColor;
-        button.layer.borderWidth = 1;
-        button.layer.borderColor = [NSColor colorWithCalibratedWhite:0.76 alpha:0.70].CGColor;
-        button.contentTintColor = SweepDockTextColor();
-    }
+    button.contentTintColor = danger ? SweepDockDangerColor() : SweepDockTextColor();
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)notification {
@@ -1259,8 +1239,8 @@ static int SweepDockSelfTest(void) {
     [sidebar addSubview:subtitle];
 
     NSView *statusCard = [self cardViewWithRadius:8];
-    statusCard.layer.backgroundColor = [NSColor colorWithCalibratedRed:0.965 green:0.966 blue:0.962 alpha:1.0].CGColor;
-    statusCard.layer.borderColor = [NSColor colorWithCalibratedWhite:0.76 alpha:0.70].CGColor;
+    statusCard.layer.backgroundColor = [NSColor colorWithCalibratedRed:0.990 green:0.990 blue:0.988 alpha:1.0].CGColor;
+    statusCard.layer.borderColor = [NSColor colorWithCalibratedWhite:0.84 alpha:0.50].CGColor;
     [sidebar addSubview:statusCard];
 
     self.statusField = [self label:@"正在检测 Mole CLI..." font:[NSFont boldSystemFontOfSize:14] color:SweepDockTextColor()];
@@ -1274,12 +1254,12 @@ static int SweepDockSelfTest(void) {
         @[@"系统状态", @"status", @NO],
         @[@"磁盘分析", @"analyze --json", @NO],
         @[@"清理预览", @"clean --dry-run", @NO],
-        @[@"执行清理", @"clean", @YES],
+        @[@"谨慎清理", @"clean", @YES],
         @[@"清理历史", @"history --json", @NO],
         @[@"应用卸载", @"uninstall --list", @NO],
         @[@"项目清理", @"purge --dry-run", @NO],
         @[@"优化预览", @"optimize --dry-run", @NO],
-        @[@"执行优化", @"optimize", @YES],
+        @[@"谨慎优化", @"optimize", @YES],
         @[@"Mole 帮助", @"--help", @NO],
     ];
 
