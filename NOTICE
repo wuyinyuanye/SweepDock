@@ -1,0 +1,13 @@
+SweepDock is an unofficial macOS desktop wrapper for the Mole CLI.
+
+It is not affiliated with, endorsed by, or sponsored by the Mole project or its
+author. Mole is developed by tw93:
+
+https://github.com/tw93/Mole
+
+Mole and related official product names, logos, and branding belong to their
+respective owners. SweepDock does not include Mole source code and invokes the
+locally installed `mo` command-line executable.
+
+Because Mole is distributed under GPL-3.0 and this project is designed to work
+with that ecosystem, SweepDock is published under GPL-3.0-compatible terms.
