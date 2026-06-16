@@ -11,6 +11,9 @@ static NSColor *SweepDockTextColor(void);
 static NSColor *SweepDockSecondaryTextColor(void);
 static NSColor *SweepDockPanelColor(void);
 static NSColor *SweepDockSidebarColor(void);
+static NSColor *SweepDockCardColor(void);
+static NSColor *SweepDockAccentColor(void);
+static NSColor *SweepDockDangerColor(void);
 
 static NSMutableDictionary<NSString *, NSString *> *SweepDockEnvironment(void) {
     NSMutableDictionary<NSString *, NSString *> *environment = [[[NSProcessInfo processInfo] environment] mutableCopy];
@@ -582,19 +585,31 @@ static NSString *SweepDockStringValue(id value) {
 }
 
 static NSColor *SweepDockTextColor(void) {
-    return [NSColor colorWithCalibratedRed:0.10 green:0.11 blue:0.13 alpha:1.0];
+    return [NSColor colorWithCalibratedRed:0.09 green:0.10 blue:0.12 alpha:1.0];
 }
 
 static NSColor *SweepDockSecondaryTextColor(void) {
-    return [NSColor colorWithCalibratedRed:0.42 green:0.45 blue:0.50 alpha:1.0];
+    return [NSColor colorWithCalibratedRed:0.39 green:0.42 blue:0.48 alpha:1.0];
 }
 
 static NSColor *SweepDockPanelColor(void) {
-    return [NSColor colorWithCalibratedRed:0.98 green:0.98 blue:0.985 alpha:1.0];
+    return [NSColor colorWithCalibratedRed:0.955 green:0.965 blue:0.975 alpha:1.0];
 }
 
 static NSColor *SweepDockSidebarColor(void) {
-    return [NSColor colorWithCalibratedRed:0.94 green:0.95 blue:0.965 alpha:1.0];
+    return [NSColor colorWithCalibratedRed:0.90 green:0.925 blue:0.95 alpha:1.0];
+}
+
+static NSColor *SweepDockCardColor(void) {
+    return [NSColor colorWithCalibratedRed:0.995 green:0.997 blue:1.0 alpha:1.0];
+}
+
+static NSColor *SweepDockAccentColor(void) {
+    return [NSColor colorWithCalibratedRed:0.10 green:0.42 blue:0.82 alpha:1.0];
+}
+
+static NSColor *SweepDockDangerColor(void) {
+    return [NSColor colorWithCalibratedRed:0.76 green:0.18 blue:0.16 alpha:1.0];
 }
 
 static NSString *SweepDockPercent(NSNumber *number) {
@@ -1144,6 +1159,37 @@ static int SweepDockSelfTest(void) {
 
 @implementation SweepDockAppDelegate
 
+- (NSView *)cardViewWithRadius:(CGFloat)radius {
+    NSView *view = [[NSView alloc] initWithFrame:NSZeroRect];
+    view.translatesAutoresizingMaskIntoConstraints = NO;
+    view.wantsLayer = YES;
+    view.layer.backgroundColor = SweepDockCardColor().CGColor;
+    view.layer.cornerRadius = radius;
+    view.layer.borderWidth = 1;
+    view.layer.borderColor = [NSColor colorWithCalibratedWhite:0.84 alpha:0.75].CGColor;
+    return view;
+}
+
+- (void)styleButton:(NSButton *)button prominent:(BOOL)prominent danger:(BOOL)danger {
+    button.bezelStyle = prominent ? NSBezelStyleRegularSquare : NSBezelStyleRounded;
+    button.font = [NSFont systemFontOfSize:13 weight:prominent ? NSFontWeightSemibold : NSFontWeightMedium];
+    button.alignment = NSTextAlignmentCenter;
+    button.lineBreakMode = NSLineBreakByTruncatingTail;
+    button.wantsLayer = YES;
+    button.layer.cornerRadius = prominent ? 7 : 6;
+    button.layer.masksToBounds = YES;
+    if (prominent) {
+        NSColor *base = danger ? SweepDockDangerColor() : SweepDockAccentColor();
+        button.layer.backgroundColor = base.CGColor;
+        button.contentTintColor = [NSColor whiteColor];
+    } else {
+        button.layer.backgroundColor = [NSColor colorWithCalibratedWhite:1.0 alpha:0.62].CGColor;
+        button.layer.borderWidth = 1;
+        button.layer.borderColor = [NSColor colorWithCalibratedWhite:0.78 alpha:0.75].CGColor;
+        button.contentTintColor = SweepDockTextColor();
+    }
+}
+
 - (void)applicationDidFinishLaunching:(NSNotification *)notification {
     [self buildWindow];
     [self refreshMole:nil];
@@ -1154,7 +1200,7 @@ static int SweepDockSelfTest(void) {
 }
 
 - (void)buildWindow {
-    NSRect frame = NSMakeRect(0, 0, 1180, 720);
+    NSRect frame = NSMakeRect(0, 0, 1220, 760);
     self.window = [[NSWindow alloc] initWithContentRect:frame
                                              styleMask:(NSWindowStyleMaskTitled |
                                                         NSWindowStyleMaskClosable |
@@ -1163,7 +1209,7 @@ static int SweepDockSelfTest(void) {
                                                backing:NSBackingStoreBuffered
                                                  defer:NO];
     self.window.title = @"SweepDock";
-    self.window.minSize = NSMakeSize(1120, 660);
+    self.window.minSize = NSMakeSize(1140, 680);
     if (@available(macOS 10.14, *)) {
         self.window.appearance = [NSAppearance appearanceNamed:NSAppearanceNameAqua];
     }
@@ -1173,7 +1219,7 @@ static int SweepDockSelfTest(void) {
     root.wantsLayer = YES;
     root.layer.backgroundColor = SweepDockPanelColor().CGColor;
 
-    NSView *sidebar = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 310, 680)];
+    NSView *sidebar = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 284, 720)];
     sidebar.translatesAutoresizingMaskIntoConstraints = NO;
     sidebar.wantsLayer = YES;
     sidebar.layer.backgroundColor = SweepDockSidebarColor().CGColor;
@@ -1189,26 +1235,24 @@ static int SweepDockSelfTest(void) {
         [sidebar.leadingAnchor constraintEqualToAnchor:root.leadingAnchor],
         [sidebar.topAnchor constraintEqualToAnchor:root.topAnchor],
         [sidebar.bottomAnchor constraintEqualToAnchor:root.bottomAnchor],
-        [sidebar.widthAnchor constraintEqualToConstant:310],
+        [sidebar.widthAnchor constraintEqualToConstant:284],
         [main.leadingAnchor constraintEqualToAnchor:sidebar.trailingAnchor],
         [main.trailingAnchor constraintEqualToAnchor:root.trailingAnchor],
         [main.topAnchor constraintEqualToAnchor:root.topAnchor],
         [main.bottomAnchor constraintEqualToAnchor:root.bottomAnchor],
     ]];
 
-    NSTextField *title = [self label:@"SweepDock" font:[NSFont boldSystemFontOfSize:32] color:SweepDockTextColor()];
+    NSTextField *title = [self label:@"SweepDock" font:[NSFont systemFontOfSize:30 weight:NSFontWeightBold] color:SweepDockTextColor()];
     [sidebar addSubview:title];
 
-    NSTextField *subtitle = [self label:@"Mole CLI 的桌面外壳"
-                                   font:[NSFont systemFontOfSize:12]
+    NSTextField *subtitle = [self label:@"Mole CLI 桌面控制台"
+                                   font:[NSFont systemFontOfSize:12 weight:NSFontWeightMedium]
                                   color:SweepDockSecondaryTextColor()];
     [sidebar addSubview:subtitle];
 
-    NSView *statusCard = [[NSView alloc] initWithFrame:NSZeroRect];
-    statusCard.translatesAutoresizingMaskIntoConstraints = NO;
-    statusCard.wantsLayer = YES;
-    statusCard.layer.backgroundColor = [NSColor colorWithCalibratedRed:0.88 green:0.90 blue:0.94 alpha:1.0].CGColor;
-    statusCard.layer.cornerRadius = 8;
+    NSView *statusCard = [self cardViewWithRadius:8];
+    statusCard.layer.backgroundColor = [NSColor colorWithCalibratedRed:0.84 green:0.90 blue:0.98 alpha:1.0].CGColor;
+    statusCard.layer.borderColor = [NSColor colorWithCalibratedRed:0.70 green:0.80 blue:0.94 alpha:1.0].CGColor;
     [sidebar addSubview:statusCard];
 
     self.statusField = [self label:@"正在检测 Mole CLI..." font:[NSFont boldSystemFontOfSize:14] color:SweepDockTextColor()];
@@ -1237,11 +1281,7 @@ static int SweepDockSelfTest(void) {
                                               target:self
                                               action:@selector(actionButtonClicked:)];
         button.translatesAutoresizingMaskIntoConstraints = NO;
-        button.bezelStyle = NSBezelStyleRounded;
-        button.alignment = NSTextAlignmentCenter;
-        button.lineBreakMode = NSLineBreakByTruncatingTail;
-        button.font = [NSFont systemFontOfSize:14 weight:NSFontWeightMedium];
-        button.contentTintColor = SweepDockTextColor();
+        [self styleButton:button prominent:YES danger:[item[2] boolValue]];
         button.identifier = item[1];
         button.tag = [item[2] boolValue] ? 1 : 0;
         [sidebar addSubview:button];
@@ -1250,22 +1290,25 @@ static int SweepDockSelfTest(void) {
 
     NSButton *refresh = [NSButton buttonWithTitle:@"刷新检测" target:self action:@selector(refreshMole:)];
     refresh.translatesAutoresizingMaskIntoConstraints = NO;
-    refresh.bezelStyle = NSBezelStyleRounded;
+    [self styleButton:refresh prominent:NO danger:NO];
     [sidebar addSubview:refresh];
 
-    self.outputTitleField = [self label:@"欢迎使用" font:[NSFont boldSystemFontOfSize:22] color:SweepDockTextColor()];
-    [main addSubview:self.outputTitleField];
+    NSView *workspace = [self cardViewWithRadius:8];
+    [main addSubview:workspace];
+
+    self.outputTitleField = [self label:@"欢迎使用" font:[NSFont systemFontOfSize:24 weight:NSFontWeightBold] color:SweepDockTextColor()];
+    [workspace addSubview:self.outputTitleField];
 
     self.commandField = [self label:@"还没有运行任何命令。" font:[NSFont systemFontOfSize:12] color:SweepDockSecondaryTextColor()];
-    [main addSubview:self.commandField];
+    [workspace addSubview:self.commandField];
 
     self.summaryField = [self label:@"" font:[NSFont systemFontOfSize:12] color:SweepDockSecondaryTextColor()];
-    [main addSubview:self.summaryField];
+    [workspace addSubview:self.summaryField];
 
     self.outputCopyButton = [NSButton buttonWithTitle:@"复制输出" target:self action:@selector(copyCurrentOutput:)];
     self.outputCopyButton.translatesAutoresizingMaskIntoConstraints = NO;
-    self.outputCopyButton.bezelStyle = NSBezelStyleRounded;
-    [main addSubview:self.outputCopyButton];
+    [self styleButton:self.outputCopyButton prominent:NO danger:NO];
+    [workspace addSubview:self.outputCopyButton];
 
     self.tableSearchField = [[NSSearchField alloc] initWithFrame:NSZeroRect];
     self.tableSearchField.translatesAutoresizingMaskIntoConstraints = NO;
@@ -1273,7 +1316,7 @@ static int SweepDockSelfTest(void) {
     self.tableSearchField.target = self;
     self.tableSearchField.action = @selector(filterTableRows:);
     self.tableSearchField.hidden = YES;
-    [main addSubview:self.tableSearchField];
+    [workspace addSubview:self.tableSearchField];
 
     self.tableStatusFilter = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
     self.tableStatusFilter.translatesAutoresizingMaskIntoConstraints = NO;
@@ -1281,64 +1324,64 @@ static int SweepDockSelfTest(void) {
     self.tableStatusFilter.target = self;
     self.tableStatusFilter.action = @selector(filterTableRows:);
     self.tableStatusFilter.hidden = YES;
-    [main addSubview:self.tableStatusFilter];
+    [workspace addSubview:self.tableStatusFilter];
 
     self.openDetailButton = [NSButton buttonWithTitle:@"打开清单" target:self action:@selector(openDetailFile:)];
     self.openDetailButton.translatesAutoresizingMaskIntoConstraints = NO;
-    self.openDetailButton.bezelStyle = NSBezelStyleRounded;
+    [self styleButton:self.openDetailButton prominent:NO danger:NO];
     self.openDetailButton.enabled = NO;
     self.openDetailButton.hidden = YES;
-    [main addSubview:self.openDetailButton];
+    [workspace addSubview:self.openDetailButton];
 
     self.detailPathButton = [NSButton buttonWithTitle:@"复制路径" target:self action:@selector(copyDetailPath:)];
     self.detailPathButton.translatesAutoresizingMaskIntoConstraints = NO;
-    self.detailPathButton.bezelStyle = NSBezelStyleRounded;
+    [self styleButton:self.detailPathButton prominent:NO danger:NO];
     self.detailPathButton.enabled = NO;
     self.detailPathButton.hidden = YES;
-    [main addSubview:self.detailPathButton];
+    [workspace addSubview:self.detailPathButton];
 
     self.openLogButton = [NSButton buttonWithTitle:@"打开日志" target:self action:@selector(openLogFile:)];
     self.openLogButton.translatesAutoresizingMaskIntoConstraints = NO;
-    self.openLogButton.bezelStyle = NSBezelStyleRounded;
+    [self styleButton:self.openLogButton prominent:NO danger:NO];
     self.openLogButton.enabled = NO;
     self.openLogButton.hidden = YES;
-    [main addSubview:self.openLogButton];
+    [workspace addSubview:self.openLogButton];
 
     self.appNameField = [[NSTextField alloc] initWithFrame:NSZeroRect];
     self.appNameField.translatesAutoresizingMaskIntoConstraints = NO;
     self.appNameField.placeholderString = @"输入应用名";
     self.appNameField.hidden = YES;
-    [main addSubview:self.appNameField];
+    [workspace addSubview:self.appNameField];
 
     self.previewUninstallButton = [NSButton buttonWithTitle:@"卸载预览" target:self action:@selector(previewUninstall:)];
     self.previewUninstallButton.translatesAutoresizingMaskIntoConstraints = NO;
-    self.previewUninstallButton.bezelStyle = NSBezelStyleRounded;
+    [self styleButton:self.previewUninstallButton prominent:NO danger:NO];
     self.previewUninstallButton.hidden = YES;
-    [main addSubview:self.previewUninstallButton];
+    [workspace addSubview:self.previewUninstallButton];
 
     self.runUninstallButton = [NSButton buttonWithTitle:@"执行卸载" target:self action:@selector(runUninstall:)];
     self.runUninstallButton.translatesAutoresizingMaskIntoConstraints = NO;
-    self.runUninstallButton.bezelStyle = NSBezelStyleRounded;
+    [self styleButton:self.runUninstallButton prominent:NO danger:YES];
     self.runUninstallButton.hidden = YES;
-    [main addSubview:self.runUninstallButton];
+    [workspace addSubview:self.runUninstallButton];
 
     self.analyzeParentButton = [NSButton buttonWithTitle:@"上级" target:self action:@selector(openAnalyzeParent:)];
     self.analyzeParentButton.translatesAutoresizingMaskIntoConstraints = NO;
-    self.analyzeParentButton.bezelStyle = NSBezelStyleRounded;
+    [self styleButton:self.analyzeParentButton prominent:NO danger:NO];
     self.analyzeParentButton.hidden = YES;
-    [main addSubview:self.analyzeParentButton];
+    [workspace addSubview:self.analyzeParentButton];
 
     self.analyzeFinderButton = [NSButton buttonWithTitle:@"Finder" target:self action:@selector(openAnalyzeInFinder:)];
     self.analyzeFinderButton.translatesAutoresizingMaskIntoConstraints = NO;
-    self.analyzeFinderButton.bezelStyle = NSBezelStyleRounded;
+    [self styleButton:self.analyzeFinderButton prominent:NO danger:NO];
     self.analyzeFinderButton.hidden = YES;
-    [main addSubview:self.analyzeFinderButton];
+    [workspace addSubview:self.analyzeFinderButton];
 
     self.analyzeTrashButton = [NSButton buttonWithTitle:@"移到废纸篓" target:self action:@selector(trashSelectedAnalyzeItem:)];
     self.analyzeTrashButton.translatesAutoresizingMaskIntoConstraints = NO;
-    self.analyzeTrashButton.bezelStyle = NSBezelStyleRounded;
+    [self styleButton:self.analyzeTrashButton prominent:NO danger:YES];
     self.analyzeTrashButton.hidden = YES;
-    [main addSubview:self.analyzeTrashButton];
+    [workspace addSubview:self.analyzeTrashButton];
 
     self.openDetailWidthConstraint = [self.openDetailButton.widthAnchor constraintEqualToConstant:0];
     self.detailPathWidthConstraint = [self.detailPathButton.widthAnchor constraintEqualToConstant:0];
@@ -1355,14 +1398,21 @@ static int SweepDockSelfTest(void) {
     self.tableScrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
     self.tableScrollView.translatesAutoresizingMaskIntoConstraints = NO;
     self.tableScrollView.hasVerticalScroller = YES;
-    self.tableScrollView.borderType = NSBezelBorder;
+    self.tableScrollView.borderType = NSNoBorder;
+    self.tableScrollView.wantsLayer = YES;
+    self.tableScrollView.layer.cornerRadius = 8;
+    self.tableScrollView.layer.borderWidth = 1;
+    self.tableScrollView.layer.borderColor = [NSColor colorWithCalibratedWhite:0.84 alpha:0.85].CGColor;
     self.tableScrollView.hidden = YES;
-    [main addSubview:self.tableScrollView];
+    [workspace addSubview:self.tableScrollView];
 
     self.analyzeTableView = [[NSTableView alloc] initWithFrame:NSZeroRect];
     self.analyzeTableView.delegate = self;
     self.analyzeTableView.dataSource = self;
     self.analyzeTableView.usesAlternatingRowBackgroundColors = YES;
+    self.analyzeTableView.rowHeight = 30;
+    self.analyzeTableView.gridStyleMask = NSTableViewSolidHorizontalGridLineMask;
+    self.analyzeTableView.gridColor = [NSColor colorWithCalibratedWhite:0.88 alpha:0.8];
     self.analyzeTableView.doubleAction = @selector(tableRowDoubleClicked:);
     self.analyzeTableView.target = self;
 
@@ -1385,19 +1435,22 @@ static int SweepDockSelfTest(void) {
     scrollView.translatesAutoresizingMaskIntoConstraints = NO;
     scrollView.hasVerticalScroller = YES;
     scrollView.borderType = NSNoBorder;
-    [main addSubview:scrollView];
+    scrollView.wantsLayer = YES;
+    scrollView.layer.cornerRadius = 8;
+    scrollView.layer.borderWidth = 1;
+    scrollView.layer.borderColor = [NSColor colorWithCalibratedWhite:0.84 alpha:0.85].CGColor;
+    [workspace addSubview:scrollView];
 
     self.outputView = [[NSTextView alloc] initWithFrame:NSZeroRect];
     self.outputView.editable = NO;
     self.outputView.selectable = YES;
-    self.outputView.font = [NSFont monospacedSystemFontOfSize:12 weight:NSFontWeightRegular];
+    self.outputView.font = [NSFont monospacedSystemFontOfSize:12.5 weight:NSFontWeightRegular];
     self.outputView.textColor = SweepDockTextColor();
-    self.outputView.backgroundColor = [NSColor whiteColor];
+    self.outputView.backgroundColor = [NSColor colorWithCalibratedRed:0.985 green:0.99 blue:0.995 alpha:1.0];
     self.outputView.insertionPointColor = SweepDockTextColor();
-    self.outputView.textContainerInset = NSMakeSize(12, 10);
+    self.outputView.textContainerInset = NSMakeSize(16, 14);
     scrollView.drawsBackground = YES;
-    scrollView.backgroundColor = [NSColor whiteColor];
-    scrollView.borderType = NSBezelBorder;
+    scrollView.backgroundColor = self.outputView.backgroundColor;
     self.outputView.string = @"欢迎使用 SweepDock。\n\n请从左侧选择一个操作。建议先运行“清理预览”，确认将要处理的内容后再执行真实清理。";
     scrollView.documentView = self.outputView;
 
@@ -1425,16 +1478,20 @@ static int SweepDockSelfTest(void) {
         [refresh.trailingAnchor constraintEqualToAnchor:sidebar.trailingAnchor constant:-20],
         [refresh.bottomAnchor constraintEqualToAnchor:sidebar.bottomAnchor constant:-20],
         [refresh.heightAnchor constraintEqualToConstant:34],
-        [self.outputTitleField.leadingAnchor constraintEqualToAnchor:main.leadingAnchor constant:24],
+        [workspace.leadingAnchor constraintEqualToAnchor:main.leadingAnchor constant:24],
+        [workspace.trailingAnchor constraintEqualToAnchor:main.trailingAnchor constant:-24],
+        [workspace.topAnchor constraintEqualToAnchor:main.topAnchor constant:24],
+        [workspace.bottomAnchor constraintEqualToAnchor:main.bottomAnchor constant:-24],
+        [self.outputTitleField.leadingAnchor constraintEqualToAnchor:workspace.leadingAnchor constant:24],
         [self.outputTitleField.trailingAnchor constraintLessThanOrEqualToAnchor:self.tableStatusFilter.leadingAnchor constant:-12],
-        [self.outputTitleField.topAnchor constraintEqualToAnchor:main.topAnchor constant:24],
+        [self.outputTitleField.topAnchor constraintEqualToAnchor:workspace.topAnchor constant:22],
         [self.commandField.leadingAnchor constraintEqualToAnchor:self.outputTitleField.leadingAnchor],
-        [self.commandField.trailingAnchor constraintEqualToAnchor:main.trailingAnchor constant:-24],
+        [self.commandField.trailingAnchor constraintEqualToAnchor:workspace.trailingAnchor constant:-24],
         [self.commandField.topAnchor constraintEqualToAnchor:self.outputTitleField.bottomAnchor constant:6],
         [self.summaryField.leadingAnchor constraintEqualToAnchor:self.outputTitleField.leadingAnchor],
-        [self.summaryField.trailingAnchor constraintEqualToAnchor:main.trailingAnchor constant:-24],
+        [self.summaryField.trailingAnchor constraintEqualToAnchor:workspace.trailingAnchor constant:-24],
         [self.summaryField.topAnchor constraintEqualToAnchor:self.commandField.bottomAnchor constant:4],
-        [self.openLogButton.trailingAnchor constraintEqualToAnchor:main.trailingAnchor constant:-24],
+        [self.openLogButton.trailingAnchor constraintEqualToAnchor:workspace.trailingAnchor constant:-24],
         [self.openLogButton.centerYAnchor constraintEqualToAnchor:self.outputTitleField.centerYAnchor],
         self.openLogWidthConstraint,
         [self.analyzeTrashButton.trailingAnchor constraintEqualToAnchor:self.openLogButton.leadingAnchor constant:-8],
@@ -1469,23 +1526,23 @@ static int SweepDockSelfTest(void) {
         [self.tableStatusFilter.trailingAnchor constraintEqualToAnchor:self.tableSearchField.leadingAnchor constant:-8],
         [self.tableStatusFilter.centerYAnchor constraintEqualToAnchor:self.outputTitleField.centerYAnchor],
         self.tableStatusWidthConstraint,
-        [self.tableScrollView.leadingAnchor constraintEqualToAnchor:main.leadingAnchor constant:24],
-        [self.tableScrollView.trailingAnchor constraintEqualToAnchor:main.trailingAnchor constant:-24],
+        [self.tableScrollView.leadingAnchor constraintEqualToAnchor:workspace.leadingAnchor constant:24],
+        [self.tableScrollView.trailingAnchor constraintEqualToAnchor:workspace.trailingAnchor constant:-24],
         [self.tableScrollView.topAnchor constraintEqualToAnchor:self.summaryField.bottomAnchor constant:14],
         self.analyzeTableHeightConstraint,
-        [scrollView.leadingAnchor constraintEqualToAnchor:main.leadingAnchor constant:24],
-        [scrollView.trailingAnchor constraintEqualToAnchor:main.trailingAnchor constant:-24],
+        [scrollView.leadingAnchor constraintEqualToAnchor:workspace.leadingAnchor constant:24],
+        [scrollView.trailingAnchor constraintEqualToAnchor:workspace.trailingAnchor constant:-24],
         [scrollView.topAnchor constraintEqualToAnchor:self.tableScrollView.bottomAnchor constant:16],
-        [scrollView.bottomAnchor constraintEqualToAnchor:main.bottomAnchor constant:-24],
+        [scrollView.bottomAnchor constraintEqualToAnchor:workspace.bottomAnchor constant:-24],
     ]];
 
     NSView *previous = statusCard;
     for (NSButton *button in actionButtons) {
         [NSLayoutConstraint activateConstraints:@[
             [button.centerXAnchor constraintEqualToAnchor:sidebar.centerXAnchor],
-            [button.widthAnchor constraintEqualToConstant:220],
-            [button.topAnchor constraintEqualToAnchor:previous.bottomAnchor constant:8],
-            [button.heightAnchor constraintEqualToConstant:36],
+            [button.widthAnchor constraintEqualToConstant:232],
+            [button.topAnchor constraintEqualToAnchor:previous.bottomAnchor constant:9],
+            [button.heightAnchor constraintEqualToConstant:34],
         ]];
         previous = button;
     }
