@@ -593,23 +593,23 @@ static NSColor *SweepDockSecondaryTextColor(void) {
 }
 
 static NSColor *SweepDockPanelColor(void) {
-    return [NSColor colorWithCalibratedRed:0.955 green:0.965 blue:0.975 alpha:1.0];
+    return [NSColor colorWithCalibratedRed:0.945 green:0.948 blue:0.952 alpha:1.0];
 }
 
 static NSColor *SweepDockSidebarColor(void) {
-    return [NSColor colorWithCalibratedRed:0.90 green:0.925 blue:0.95 alpha:1.0];
+    return [NSColor colorWithCalibratedRed:0.915 green:0.920 blue:0.925 alpha:1.0];
 }
 
 static NSColor *SweepDockCardColor(void) {
-    return [NSColor colorWithCalibratedRed:0.995 green:0.997 blue:1.0 alpha:1.0];
+    return [NSColor colorWithCalibratedRed:0.985 green:0.987 blue:0.990 alpha:1.0];
 }
 
 static NSColor *SweepDockAccentColor(void) {
-    return [NSColor colorWithCalibratedRed:0.10 green:0.42 blue:0.82 alpha:1.0];
+    return [NSColor colorWithCalibratedRed:0.16 green:0.17 blue:0.19 alpha:1.0];
 }
 
 static NSColor *SweepDockDangerColor(void) {
-    return [NSColor colorWithCalibratedRed:0.76 green:0.18 blue:0.16 alpha:1.0];
+    return [NSColor colorWithCalibratedRed:0.58 green:0.35 blue:0.12 alpha:1.0];
 }
 
 static NSString *SweepDockPercent(NSNumber *number) {
@@ -1171,7 +1171,7 @@ static int SweepDockSelfTest(void) {
 }
 
 - (void)styleButton:(NSButton *)button prominent:(BOOL)prominent danger:(BOOL)danger {
-    button.bezelStyle = prominent ? NSBezelStyleRegularSquare : NSBezelStyleRounded;
+    button.bezelStyle = NSBezelStyleRegularSquare;
     button.font = [NSFont systemFontOfSize:13 weight:prominent ? NSFontWeightSemibold : NSFontWeightMedium];
     button.alignment = NSTextAlignmentCenter;
     button.lineBreakMode = NSLineBreakByTruncatingTail;
@@ -1179,13 +1179,21 @@ static int SweepDockSelfTest(void) {
     button.layer.cornerRadius = prominent ? 7 : 6;
     button.layer.masksToBounds = YES;
     if (prominent) {
-        NSColor *base = danger ? SweepDockDangerColor() : SweepDockAccentColor();
-        button.layer.backgroundColor = base.CGColor;
-        button.contentTintColor = [NSColor whiteColor];
+        if (danger) {
+            button.layer.backgroundColor = [NSColor colorWithCalibratedRed:0.985 green:0.972 blue:0.948 alpha:1.0].CGColor;
+            button.layer.borderWidth = 1;
+            button.layer.borderColor = [NSColor colorWithCalibratedRed:0.78 green:0.66 blue:0.48 alpha:0.85].CGColor;
+            button.contentTintColor = SweepDockDangerColor();
+        } else {
+            button.layer.backgroundColor = SweepDockAccentColor().CGColor;
+            button.layer.borderWidth = 1;
+            button.layer.borderColor = [NSColor colorWithCalibratedWhite:0.10 alpha:0.95].CGColor;
+            button.contentTintColor = [NSColor whiteColor];
+        }
     } else {
-        button.layer.backgroundColor = [NSColor colorWithCalibratedWhite:1.0 alpha:0.62].CGColor;
+        button.layer.backgroundColor = [NSColor colorWithCalibratedWhite:1.0 alpha:0.56].CGColor;
         button.layer.borderWidth = 1;
-        button.layer.borderColor = [NSColor colorWithCalibratedWhite:0.78 alpha:0.75].CGColor;
+        button.layer.borderColor = [NSColor colorWithCalibratedWhite:0.76 alpha:0.70].CGColor;
         button.contentTintColor = SweepDockTextColor();
     }
 }
@@ -1251,8 +1259,8 @@ static int SweepDockSelfTest(void) {
     [sidebar addSubview:subtitle];
 
     NSView *statusCard = [self cardViewWithRadius:8];
-    statusCard.layer.backgroundColor = [NSColor colorWithCalibratedRed:0.84 green:0.90 blue:0.98 alpha:1.0].CGColor;
-    statusCard.layer.borderColor = [NSColor colorWithCalibratedRed:0.70 green:0.80 blue:0.94 alpha:1.0].CGColor;
+    statusCard.layer.backgroundColor = [NSColor colorWithCalibratedRed:0.965 green:0.966 blue:0.962 alpha:1.0].CGColor;
+    statusCard.layer.borderColor = [NSColor colorWithCalibratedWhite:0.76 alpha:0.70].CGColor;
     [sidebar addSubview:statusCard];
 
     self.statusField = [self label:@"正在检测 Mole CLI..." font:[NSFont boldSystemFontOfSize:14] color:SweepDockTextColor()];
